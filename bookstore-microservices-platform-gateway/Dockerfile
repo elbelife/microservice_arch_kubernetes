@@ -1,4 +1,4 @@
-FROM openjdk:12-alpine
+FROM --platform=linux/amd64 eclipse-temurin:11-jre-alpine
 
 MAINTAINER icyfenix
 

@@ -9,30 +9,30 @@ metadata:
   name: book-admin
   namespace: bookstore-microservices
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: book-admin-role
   namespace: bookstore-microservices
 rules:
-- apiGroups:
-  - ""
-  - "extensions"
-  - "app"
-  resources:
-  - namespaces
-  - endpoints
-  - services
-  - nodes
-  - nodes/proxy
-  - pods
-  - configmaps
-  verbs:
-  - list
-  - get
-  - watch
+  - apiGroups:
+      - ""
+      - "extensions"
+      - "app"
+    resources:
+      - namespaces
+      - endpoints
+      - services
+      - nodes
+      - nodes/proxy
+      - pods
+      - configmaps
+    verbs:
+      - list
+      - get
+      - watch
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: book-admin-role-binding
@@ -42,9 +42,9 @@ roleRef:
   kind: Role
   name: book-admin-role
 subjects:
-- kind: ServiceAccount
-  name: book-admin
-  namespace: bookstore-microservices
+  - kind: ServiceAccount
+    name: book-admin
+    namespace: bookstore-microservices
 ---
 apiVersion: v1
 data:
@@ -285,8 +285,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-  - port: 80
-    targetPort: http-server
+    - port: 80
+      targetPort: http-server
   selector:
     app: account
   type: ClusterIP
@@ -300,9 +300,9 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-  - nodePort: 30080
-    port: 8080
-    targetPort: http-server
+    - nodePort: 30080
+      port: 8080
+      targetPort: http-server
   selector:
     app: gateway
   type: NodePort
@@ -316,8 +316,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-  - port: 80
-    targetPort: http-server
+    - port: 80
+      targetPort: http-server
   selector:
     app: payment
   type: ClusterIP
@@ -331,8 +331,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-  - port: 80
-    targetPort: http-server
+    - port: 80
+      targetPort: http-server
   selector:
     app: security
   type: ClusterIP
@@ -346,8 +346,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-  - port: 80
-    targetPort: http-server
+    - port: 80
+      targetPort: http-server
   selector:
     app: warehouse
   type: ClusterIP
@@ -370,16 +370,16 @@ spec:
         app: account
     spec:
       containers:
-      - env:
-        - name: PORT
-          value: "80"
-        - name: JAVA_TOOL_OPTIONS
-          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-        image: icyfenix/bookstore-kubernetes-domain-account
-        name: account
-        ports:
-        - containerPort: 80
-          name: http-server
+        - env:
+            - name: PORT
+              value: "80"
+            - name: JAVA_TOOL_OPTIONS
+              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+          image: icyfenix/bookstore-kubernetes-domain-account
+          name: account
+          ports:
+            - containerPort: 80
+              name: http-server
       serviceAccountName: book-admin
 ---
 apiVersion: apps/v1
@@ -400,16 +400,16 @@ spec:
         app: payment
     spec:
       containers:
-      - env:
-        - name: PORT
-          value: "80"
-        - name: JAVA_TOOL_OPTIONS
-          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-        image: icyfenix/bookstore-kubernetes-domain-payment
-        name: payment
-        ports:
-        - containerPort: 80
-          name: http-server
+        - env:
+            - name: PORT
+              value: "80"
+            - name: JAVA_TOOL_OPTIONS
+              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+          image: icyfenix/bookstore-kubernetes-domain-payment
+          name: payment
+          ports:
+            - containerPort: 80
+              name: http-server
       serviceAccountName: book-admin
 ---
 apiVersion: apps/v1
@@ -430,16 +430,16 @@ spec:
         app: security
     spec:
       containers:
-      - env:
-        - name: PORT
-          value: "80"
-        - name: JAVA_TOOL_OPTIONS
-          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-        image: icyfenix/bookstore-kubernetes-domain-security
-        name: security
-        ports:
-        - containerPort: 80
-          name: http-server
+        - env:
+            - name: PORT
+              value: "80"
+            - name: JAVA_TOOL_OPTIONS
+              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+          image: icyfenix/bookstore-kubernetes-domain-security
+          name: security
+          ports:
+            - containerPort: 80
+              name: http-server
       serviceAccountName: book-admin
 ---
 apiVersion: apps/v1
@@ -460,16 +460,16 @@ spec:
         app: warehouse
     spec:
       containers:
-      - env:
-        - name: PORT
-          value: "80"
-        - name: JAVA_TOOL_OPTIONS
-          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-        image: icyfenix/bookstore-kubernetes-domain-warehouse
-        name: warehouse
-        ports:
-        - containerPort: 80
-          name: http-server
+        - env:
+            - name: PORT
+              value: "80"
+            - name: JAVA_TOOL_OPTIONS
+              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+          image: icyfenix/bookstore-kubernetes-domain-warehouse
+          name: warehouse
+          ports:
+            - containerPort: 80
+              name: http-server
       serviceAccountName: book-admin
 ---
 apiVersion: apps/v1
@@ -490,14 +490,14 @@ spec:
         app: gateway
     spec:
       containers:
-      - env:
-        - name: PORT
-          value: "8080"
-        - name: JAVA_TOOL_OPTIONS
-          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-        image: icyfenix/bookstore-kubernetes-platform-gateway
-        name: gateway
-        ports:
-        - containerPort: 8080
-          name: http-server
+        - env:
+            - name: PORT
+              value: "8080"
+            - name: JAVA_TOOL_OPTIONS
+              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+          image: icyfenix/bookstore-kubernetes-platform-gateway
+          name: gateway
+          ports:
+            - containerPort: 8080
+              name: http-server
       serviceAccountName: book-admin

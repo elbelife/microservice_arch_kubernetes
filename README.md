@@ -93,3 +93,25 @@ Fenix's Bookstore采用基于Kubernetes的微服务架构，并采用Spring Clou
   - **署名**：应在使用本文档的全部或部分内容时候，注明原作者及来源信息。
   - **非商业性使用**：不得用于商业出版或其他任何带有商业性质的行为。如需商业使用，请联系作者。
   - **相同方式共享的条件**：在本文档基础上演绎、修改的作品，应当继续以知识共享署名 4.0国际许可协议进行许可。
+
+## minikube
+#minikube start
+
+The gateway is running fine (Tomcat on port 8080, started successfully). The issue is that you're using minikube, and NodePort services aren't directly accessible via localhost on macOS.
+
+You have two options:
+
+Option 1: Use minikube service (easiest)
+This opens a tunnel from your localhost to the minikube NodePort:
+
+bash
+minikube service gateway -n bookstore-microservices
+Option 2: Use minikube tunnel
+This creates a network route so you can access the minikube IP directly:
+
+bash
+minikube tunnel
+Then access via http://192.168.49.2:30080/
+
+Would you like me to run minikube service gateway -n bookstore-microservices to get a working URL? That's typically the simplest approach on macOS with minikube.
+
