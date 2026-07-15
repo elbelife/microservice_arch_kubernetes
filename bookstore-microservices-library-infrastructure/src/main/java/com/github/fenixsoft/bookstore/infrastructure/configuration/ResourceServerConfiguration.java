@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -27,6 +28,7 @@ import javax.crypto.spec.SecretKeySpec;
  * @date 2026/07/16
  **/
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
 public class ResourceServerConfiguration {
 
