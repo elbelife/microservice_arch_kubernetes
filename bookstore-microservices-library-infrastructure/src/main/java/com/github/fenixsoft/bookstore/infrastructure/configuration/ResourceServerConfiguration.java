@@ -47,9 +47,12 @@ public class ResourceServerConfiguration {
         http.oauth2ResourceServer(oauth -> {
             oauth.bearerTokenResolver(request -> {
                 String header = request.getHeader("Authorization");
+                System.out.println("DEBUG_SECURITY - Authorization Header: " + header);
                 if (header != null) {
                     if (header.regionMatches(true, 0, "bearer ", 0, 7)) {
-                        return header.substring(7);
+                        String token = header.substring(7);
+                        System.out.println("DEBUG_SECURITY - Extracted Token: " + token);
+                        return token;
                     }
                 }
                 return null;
@@ -63,7 +66,18 @@ public class ResourceServerConfiguration {
     public JwtDecoder jwtDecoder() {
         byte[] keyBytes = JWT_TOKEN_SIGNING_PRIVATE_KEY.getBytes();
         SecretKey secretKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256");
-        return NimbusJwtDecoder.withSecretKey(secretKey).build();
+        JwtDecoder delegate = NimbusJwtDecoder.withSecretKey(secretKey).build();
+        return token -> {
+            System.out.println("DEBUG_SECURITY - Decoding token: " + token);
+            try {
+                Jwt decoded = delegate.decode(token);
+                System.out.println("DEBUG_SECURITY - Decoded successfully: " + decoded.getClaims());
+                return decoded;
+            } catch (Exception e) {
+                System.out.println("DEBUG_SECURITY - Decoding failed: " + e.getMessage());
+                throw e;
+            }
+        };
     }
 
     private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
