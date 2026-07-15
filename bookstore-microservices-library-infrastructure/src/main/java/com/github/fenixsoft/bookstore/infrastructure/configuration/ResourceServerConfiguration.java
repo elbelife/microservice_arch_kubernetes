@@ -36,7 +36,7 @@ public class ResourceServerConfiguration {
     private static final String JWT_TOKEN_SIGNING_PRIVATE_KEY = "601304E0-8AD4-40B0-BD51-0B432DC47461";
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.csrf(csrf -> csrf.disable());
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
