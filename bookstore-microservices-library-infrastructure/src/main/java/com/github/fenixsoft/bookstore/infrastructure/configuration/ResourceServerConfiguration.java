@@ -17,6 +17,11 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -94,8 +99,17 @@ public class ResourceServerConfiguration {
                 username = jwt.getSubject();
             }
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            System.out.println("DEBUG_SECURITY - Loaded username: " + username + " with authorities: " + userDetails.getAuthorities());
-            return new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
+            List<GrantedAuthority> authorities = new ArrayList<>(userDetails.getAuthorities());
+            Object scopes = jwt.getClaim("scope");
+            if (scopes instanceof Collection) {
+                for (Object scope : (Collection<?>) scopes) {
+                    authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope.toString()));
+                }
+            } else if (scopes instanceof String) {
+                authorities.add(new SimpleGrantedAuthority("SCOPE_" + scopes));
+            }
+            System.out.println("DEBUG_SECURITY - Loaded username: " + username + " with authorities: " + authorities);
+            return new UsernamePasswordAuthenticationToken(userDetails, jwt, authorities);
         };
     }
 }
