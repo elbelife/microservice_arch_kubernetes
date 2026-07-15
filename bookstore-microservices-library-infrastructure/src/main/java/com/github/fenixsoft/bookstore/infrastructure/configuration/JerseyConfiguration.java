@@ -30,6 +30,8 @@ import jakarta.ws.rs.ext.Provider;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+
 /**
  * Jersey服务器配置
  * <p>
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 @ApplicationPath("/restful")
 public class JerseyConfiguration extends ResourceConfig {
     public JerseyConfiguration() {
+        this.register(RolesAllowedDynamicFeature.class);
         scanPackages("com.github.fenixsoft.bookstore");
     }
 

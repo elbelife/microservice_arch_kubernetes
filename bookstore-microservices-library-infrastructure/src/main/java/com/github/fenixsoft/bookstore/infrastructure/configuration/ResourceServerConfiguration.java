@@ -29,8 +29,12 @@ import javax.crypto.spec.SecretKeySpec;
  **/
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
+@EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = false)
 public class ResourceServerConfiguration {
+
+    public ResourceServerConfiguration() {
+        System.out.println("DEBUG_SECURITY - ResourceServerConfiguration constructor called!");
+    }
 
     @Autowired
     private AuthenticAccountDetailsService userDetailsService;
