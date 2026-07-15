@@ -15,7 +15,6 @@ spec:
       labels:
         app: warehouse
     spec:
-      serviceAccountName: book-admin
       containers:
         - name: warehouse
           image: icyfenix/bookstore-kubernetes-domain-warehouse
@@ -26,6 +25,8 @@ spec:
           env:
             - name: PORT
               value: "80"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/config/"
           volumeMounts:

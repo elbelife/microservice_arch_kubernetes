@@ -13,9 +13,5 @@ spring:
   cloud:
     config:
       enabled: false
-    kubernetes:
-      enabled: true
-      config:
-        enabled: false
-      reload:
-        enabled: false
+    loadbalancer:
+      enabled: false
