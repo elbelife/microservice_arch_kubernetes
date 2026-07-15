@@ -41,7 +41,19 @@ public class ResourceServerConfiguration {
         http.csrf(csrf -> csrf.disable());
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-        http.oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        http.servletApi(servletApi -> servletApi.rolePrefix(""));
+        http.oauth2ResourceServer(oauth -> {
+            oauth.bearerTokenResolver(request -> {
+                String header = request.getHeader("Authorization");
+                if (header != null) {
+                    if (header.regionMatches(true, 0, "bearer ", 0, 7)) {
+                        return header.substring(7);
+                    }
+                }
+                return null;
+            });
+            oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()));
+        });
         return http.build();
     }
 
@@ -62,6 +74,7 @@ public class ResourceServerConfiguration {
                 username = jwt.getSubject();
             }
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            System.out.println("DEBUG_SECURITY - Loaded username: " + username + " with authorities: " + userDetails.getAuthorities());
             return new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
         };
     }
