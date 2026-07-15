@@ -4,45 +4,6 @@ metadata:
   name: bookstore-microservices
 ---
 apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: book-admin
-  namespace: bookstore-microservices
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: book-admin-role
-  namespace: bookstore-microservices
-rules:
-- apiGroups:
-  - ""
-  - extensions
-  - apps
-  resources:
-  - endpoints
-  - services
-  - pods
-  verbs:
-  - list
-  - get
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: book-admin-role-binding
-  namespace: bookstore-microservices
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: book-admin-role
-subjects:
-- kind: ServiceAccount
-  name: book-admin
-  namespace: bookstore-microservices
----
-apiVersion: v1
 data:
   application.yaml: |-
     database: hsqldb
@@ -364,11 +325,12 @@ spec:
     metadata:
       labels:
         app: account
-    spec:
       containers:
       - env:
         - name: PORT
           value: "80"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         - name: JAVA_TOOL_OPTIONS
           value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
@@ -381,7 +343,6 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: config-volume
-      serviceAccountName: book-admin
       volumes:
       - configMap:
           name: account
@@ -403,11 +364,12 @@ spec:
     metadata:
       labels:
         app: payment
-    spec:
       containers:
       - env:
         - name: PORT
           value: "80"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         - name: JAVA_TOOL_OPTIONS
           value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
@@ -420,7 +382,6 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: config-volume
-      serviceAccountName: book-admin
       volumes:
       - configMap:
           name: payment
@@ -442,11 +403,12 @@ spec:
     metadata:
       labels:
         app: security
-    spec:
       containers:
       - env:
         - name: PORT
           value: "80"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         - name: JAVA_TOOL_OPTIONS
           value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
@@ -459,7 +421,6 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: config-volume
-      serviceAccountName: book-admin
       volumes:
       - configMap:
           name: security
@@ -486,6 +447,8 @@ spec:
       - env:
         - name: PORT
           value: "80"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
           value: file:/config/
         image: icyfenix/bookstore-kubernetes-domain-warehouse
@@ -523,7 +486,6 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: config-volume
-      serviceAccountName: book-admin
       volumes:
       - configMap:
           name: warehouse
@@ -550,6 +512,8 @@ spec:
       - env:
         - name: PORT
           value: "8080"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
           value: file:/config/
         image: icyfenix/bookstore-kubernetes-platform-gateway
@@ -587,7 +551,6 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: config-volume
-      serviceAccountName: book-admin
       volumes:
       - configMap:
           name: gateway
