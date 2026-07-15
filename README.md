@@ -69,18 +69,14 @@
   由于面向的是开发环境，基于效率原因，笔者并没有像传统CI工程那样直接使用Maven的Docker镜像来打包Java源码，这决定了构建Dockerfile时，要监视的变动目标将是Jar文件而不是Java源码，Skaffold的执行是由Jar包的编译结果来驱动的，只在进行Maven编译、输出了新的Jar包后才会更新镜像。这样做一方面是考虑到在Maven镜像中打包不便于利用本地的仓库缓存，尤其在国内网络中，速度实在难以忍受；另外一方面，是笔者其实并不希望每保存一次源码时，都自动构建和更新一次镜像，毕竟比起传统的HotSwap或者Spring Devtool Reload来说，更新镜像重启Pod是一个更加重负载的操作。未来CNCF的[Buildpack](https://buildpacks.io/)成熟之后，应该可以绕过笨重的Dockerfile，对打包和容器热更新做更加精细化的控制。
   
   另外，对于有IDE调试需求的同学，推荐采用[Google Cloud Code](https://cloud.google.com/code)（Cloud Code同时提供了VS Code和IntelliJ Idea的插件）来配合Skaffold使用，毕竟是同一个公司出品的产品，搭配起来能获得几乎与本地开发单体应用一致的编码和调试体验。
-
 ## 技术组件
 
-Fenix's Bookstore采用基于Kubernetes的微服务架构，并采用Spring Cloud Kubernetes做了适配，其中主要的技术组件包括：
+Fenix's Bookstore 采用基于 Kubernetes 的微服务架构，并进行了现代化架构重构，主要的技术组件与设计包括：
 
-- **环境感知**：Spring Cloud Kubernetes本身引入了Fabric8的[Kubernetes Client](https://github.com/fabric8io/kubernetes-client)作为容器环境感知，不过引用的版本相当陈旧，如Spring Cloud Kubernetes 1.1.2中采用的是Fabric8 Kubernetes Client 4.4.1，Fabric8提供的兼容性列表中该版本只支持到Kubernetes 1.14，实测在1.16上也能用，但是在1.18上无法识别到最新的Api-Server，因此Maven引入依赖时需要手工处理，排除旧版本，引入新版本（本工程采用的是4.10.1）。
-- **配置中心**：采用Kubernetes的ConfigMap来管理，通过[Spring Cloud Kubernetes Config](https://github.com/spring-cloud/spring-cloud-kubernetes/tree/master/spring-cloud-kubernetes-config)自动将ConfigMap的内容注入到Spring配置文件中，并实现动态更新。
-- **服务发现**：采用Kubernetes的Service来管理，通过[Spring Cloud Kubernetes Discovery](https://github.com/spring-cloud/spring-cloud-kubernetes/tree/master/spring-cloud-kubernetes-discovery)自动将HTTP访问中的服务转换为[FQDN](https://en.wikipedia.org/wiki/Fully_qualified_domain_name)。
-- **负载均衡**：采用Kubernetes Service本身的负载均衡能力实现（就是DNS负载均衡），可以不再需要Ribbon这样的客户端负载均衡了。Spring Cloud Kubernetes从1.1.2开始也已经移除了对Ribbon的适配支持，也（暂时）没有对其代替品Spring Cloud LoadBalancer提供适配。
-- **服务网关**：网关部分仍然保留了Zuul，未采用Ingress代替。这里有两点考虑，一是Ingress Controller不算是Kubernetes的自带组件，它可以有不同的选择（KONG、Nginx、Haproxy，等等），同时也需要独立安装，作为演示工程，出于环境复杂度最小化考虑未使用Ingress；二是Fenix's Bookstore的前端工程是存放在网关中的，移除了Zuul之后也仍然要维持一个前端工程的存在，不能进一步缩减工程数量，也就削弱了移除Zuul的动力。
-- **服务熔断**：仍然采用Hystrix，Kubernetes本身无法做到精细化的服务治理，包括熔断、流控、监视，等等，我们将在基于Istio的服务网格架构中解决这个问题。
-- **认证授权**：仍然采用Spring Security OAuth 2，Kubernetes的RBAC授权可以解决服务层面的访问控制问题，但Security是跨越了业务和技术的边界的，认证授权模块本身仍承担着对前端用户的认证、授权职责，这部分是与业务相关的。
+- **环境感知与配置中心**：完全移除了重型的 Fabric8 Kubernetes Client 及 Spring Cloud Kubernetes Config 依赖。采用 Kubernetes 原生卷挂载（Volume Mounts）将 ConfigMap 挂载为本地文件，并利用 Spring Boot 3 的 `SPRING_CONFIG_ADDITIONAL_LOCATION` 环境变量直接读取，实现了微服务与 Kubernetes API Server 的解耦及“零权限”安全模型。
+- **服务发现与负载均衡**：通过 Kubernetes Service 本身的原生 CoreDNS 域名解析与内部负载均衡（ClusterIP/DNS）实现微服务间的互相寻址。禁用了 Spring Cloud LoadBalancer 和 Service Discovery 客户端，从而极大简化了服务调用链，并精简了类路径以加快容器启动速度。
+- **服务网关**：采用 **Spring Cloud Gateway** 替代了已被淘汰的 Netflix Zuul，提供了基于响应式编程模型的高性能路由分发与安全过滤器链。
+- **认证授权**：全面升级至 **Spring Security 6** 及最新的 **Spring Authorization Server**。重构了分布式认证体系，各微服务均作为 **OAuth2 Resource Server** 运行，支持无状态的 JWT 验签、Scope 权限声明解析以及 JAX-RS / Jersey 的声明式权限校验（`@PreAuthorize`）。
 
 
 ## 协议
