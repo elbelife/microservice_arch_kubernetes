@@ -38,6 +38,9 @@ public class BaseExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
+        if (exception instanceof jakarta.ws.rs.WebApplicationException) {
+            return ((jakarta.ws.rs.WebApplicationException) exception).getResponse();
+        }
         log.error(exception.getMessage(), exception);
         return CommonResponse.failure(exception.getMessage());
     }
