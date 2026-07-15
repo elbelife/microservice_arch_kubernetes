@@ -15,4 +15,7 @@ spring:
       enabled: false
     kubernetes:
       enabled: true
-      reload: true
+      config:
+        enabled: false
+      reload:
+        enabled: false

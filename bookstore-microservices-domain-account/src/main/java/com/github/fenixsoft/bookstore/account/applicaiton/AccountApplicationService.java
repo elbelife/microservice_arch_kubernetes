@@ -22,9 +22,9 @@ import com.github.fenixsoft.bookstore.account.domain.AccountRepository;
 import com.github.fenixsoft.bookstore.domain.account.Account;
 import com.github.fenixsoft.bookstore.infrastructure.utility.Encryption;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.transaction.Transactional;
 
 /**
  * 用户资源的应用服务接口

@@ -1,6 +1,6 @@
 package com.github.fenixsoft.bookstore.dto;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * 结算单中的配送信息

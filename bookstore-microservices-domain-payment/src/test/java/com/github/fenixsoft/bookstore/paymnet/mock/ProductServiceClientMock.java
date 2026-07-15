@@ -5,7 +5,7 @@ import com.github.fenixsoft.bookstore.domain.warehouse.Product;
 import com.github.fenixsoft.bookstore.domain.warehouse.Stockpile;
 import com.github.fenixsoft.bookstore.paymnet.domain.client.ProductServiceClient;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * @author icyfenix@gmail.com

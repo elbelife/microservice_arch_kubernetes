@@ -3,7 +3,7 @@ package com.github.fenixsoft.bookstore.resource.mock;
 import com.github.fenixsoft.bookstore.domain.account.Account;
 import com.github.fenixsoft.bookstore.domain.security.AccountServiceClient;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * @author icyfenix@gmail.com

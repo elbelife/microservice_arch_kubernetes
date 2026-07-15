@@ -6,8 +6,8 @@ import com.github.fenixsoft.bookstore.domain.warehouse.Stockpile;
 import com.github.fenixsoft.bookstore.dto.Settlement;
 import org.springframework.cloud.openfeign.FeignClient;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

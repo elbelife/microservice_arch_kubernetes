@@ -29,12 +29,12 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * 产品相关的资源
@@ -80,7 +80,7 @@ public class ProductResource {
             @CacheEvict(key = "'ALL_PRODUCT'")
     })
     @RolesAllowed(Role.ADMIN)
-    @PreAuthorize("#oauth2.hasAnyScope('BROWSER')")
+    @PreAuthorize("hasAuthority('SCOPE_BROWSER')")
     public Response updateProduct(@Valid Product product) {
         return CommonResponse.op(() -> service.saveProduct(product));
     }
@@ -94,7 +94,7 @@ public class ProductResource {
             @CacheEvict(key = "'ALL_PRODUCT'")
     })
     @RolesAllowed(Role.ADMIN)
-    @PreAuthorize("#oauth2.hasAnyScope('BROWSER')")
+    @PreAuthorize("hasAuthority('SCOPE_BROWSER')")
     public Product createProduct(@Valid Product product) {
         return service.saveProduct(product);
     }
@@ -109,7 +109,7 @@ public class ProductResource {
             @CacheEvict(key = "'ALL_PRODUCT'")
     })
     @RolesAllowed(Role.ADMIN)
-    @PreAuthorize("#oauth2.hasAnyScope('BROWSER')")
+    @PreAuthorize("hasAuthority('SCOPE_BROWSER')")
     public Response removeProduct(@PathParam("id") Integer id) {
         return CommonResponse.op(() -> service.removeProduct(id));
     }

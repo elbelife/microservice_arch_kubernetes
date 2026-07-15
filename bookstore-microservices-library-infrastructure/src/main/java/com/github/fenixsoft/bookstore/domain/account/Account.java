@@ -21,11 +21,11 @@ package com.github.fenixsoft.bookstore.domain.account;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.fenixsoft.bookstore.domain.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * 用户实体

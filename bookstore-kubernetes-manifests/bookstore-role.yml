@@ -6,13 +6,9 @@ metadata:
 rules:
   - apiGroups: ["", "extensions", "apps"]
     resources:
-      - namespaces
       - endpoints
       - services
-      - nodes
-      - nodes/proxy
       - pods
-      - configmaps
     verbs:
       - list
       - get

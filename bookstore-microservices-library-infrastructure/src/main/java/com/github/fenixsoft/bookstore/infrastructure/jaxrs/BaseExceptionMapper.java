@@ -21,9 +21,9 @@ package com.github.fenixsoft.bookstore.infrastructure.jaxrs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * 用于兜底的全局处理器，如果其他所有的Mapper都不合适，将由此处理把错误带到前端

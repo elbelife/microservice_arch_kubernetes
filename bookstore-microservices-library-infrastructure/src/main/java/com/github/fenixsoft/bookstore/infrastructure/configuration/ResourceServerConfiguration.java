@@ -1,90 +1,68 @@
-/*
- * Copyright 2012-2020. the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *        https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License. More information from:
- *
- *        https://github.com/fenixsoft
- */
-
 package com.github.fenixsoft.bookstore.infrastructure.configuration;
 
-import com.github.fenixsoft.bookstore.infrastructure.security.JWTAccessTokenService;
+import com.github.fenixsoft.bookstore.domain.security.AuthenticAccountDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.SecurityFilterChain;
 
-import javax.annotation.security.RolesAllowed;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
- * 资源服务器配置
- * <p>
- * 配置资源服务访问权限，主流有两种方式：
- * 方式一：是在这里通过{@link HttpSecurity}的<code>antMatchers</code>方法集中配置
- * 方式二：是启用全局方法级安全支持{@link EnableGlobalMethodSecurity} 在各个资源的访问方法前，通过注解来逐个配置，使用的注解包括有：
- * JSR 250标准注解{@link RolesAllowed}，可完整替代Spring的{@link Secured}功能
- * 以及可以使用EL表达式的Spring注解{@link PreAuthorize}、{@link PostAuthorize}
+ * Spring Security 6 资源服务器配置
  *
  * @author icyfenix@gmail.com
- * @date 2020/3/7 19:43
+ * @date 2026/07/16
  **/
 @Configuration
-@EnableResourceServer
-@EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
-public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+@EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
+public class ResourceServerConfiguration {
 
     @Autowired
-    private JWTAccessTokenService tokenService;
+    private AuthenticAccountDetailsService userDetailsService;
 
-    /**
-     * 配置HTTP访问相关的安全选项
-     */
-    public void configure(HttpSecurity http) throws Exception {
-        // 基于JWT来绑定用户状态，所以服务端可以是无状态的
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        // 关闭CSRF（Cross Site Request Forgery）跨站请求伪造的防御
-        // 因为需要状态存储CSRF Token才能开启该功能
-        http.csrf().disable();
-        // 关闭HTTP Header中的X-Frame-Options选项，允许页面在frame标签中打开
-        http.headers().frameOptions().disable();
-        // 关闭HTTP Header中的Cache-Control:no-cache，允许缓存响应结果
-        http.headers().cacheControl().disable();
-        // 设置服务的默认安全规则：
-        // 在HTTP过滤器层面，在所有的服务都允许未认证的访问
-        // 在方法安全层面，每个方法上设置所需要的认证、授权规则
-        // 即采用方式二来控制权限
-        http.authorizeRequests().anyRequest().permitAll();
-    }
+    private static final String JWT_TOKEN_SIGNING_PRIVATE_KEY = "601304E0-8AD4-40B0-BD51-0B432DC47461";
 
-    @Override
-    public void configure(ResourceServerSecurityConfigurer resources) {
-        resources.tokenServices(tokenService);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.csrf(csrf -> csrf.disable());
+        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        http.oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        return http.build();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "security.oauth2.client")
-    public ClientCredentialsResourceDetails clientCredentialsResourceDetails() {
-        return new ClientCredentialsResourceDetails();
+    public JwtDecoder jwtDecoder() {
+        byte[] keyBytes = JWT_TOKEN_SIGNING_PRIVATE_KEY.getBytes();
+        SecretKey secretKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES");
+        return NimbusJwtDecoder.withSecretKey(secretKey).build();
+    }
+
+    private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        return jwt -> {
+            String username = jwt.getClaimAsString("user_name");
+            if (username == null) {
+                username = jwt.getClaimAsString("username");
+            }
+            if (username == null) {
+                username = jwt.getSubject();
+            }
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
+        };
     }
 }

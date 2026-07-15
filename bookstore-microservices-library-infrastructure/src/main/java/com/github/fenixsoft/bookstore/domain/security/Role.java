@@ -21,7 +21,7 @@ package com.github.fenixsoft.bookstore.domain.security;
 /**
  * 角色常量类
  * 目前系统中只有2种角色：用户，管理员
- * 为了注解{@link javax.annotation.security.RolesAllowed}中使用方便，定义为字符串常量（非枚举）
+ * 为了注解{@link jakarta.annotation.security.RolesAllowed}中使用方便，定义为字符串常量（非枚举）
  *
  * @author icyfenix@gmail.com
  * @date 2020/3/16 11:32

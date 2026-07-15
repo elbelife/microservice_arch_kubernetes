@@ -19,7 +19,6 @@
 package com.github.fenixsoft.bookstore.account.domain;
 
 import com.github.fenixsoft.bookstore.domain.account.Account;
-import com.sun.xml.bind.v2.model.core.ID;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -74,13 +73,13 @@ public interface AccountRepository extends CrudRepository<Account, Integer> {
     <S extends Account> Iterable<S> saveAll(Iterable<S> entities);
 
     @Cacheable(key = "#id")
-    Optional<Account> findById(ID id);
+    Optional<Account> findById(Integer id);
 
     @Cacheable(key = "#id")
-    boolean existsById(ID id);
+    boolean existsById(Integer id);
 
     @CacheEvict(key = "#id")
-    void deleteById(ID id);
+    void deleteById(Integer id);
 
     @CacheEvict(key = "#entity.id")
     void delete(Account entity);

@@ -22,9 +22,9 @@ import com.github.fenixsoft.bookstore.domain.warehouse.Stockpile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityNotFoundException;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * 商品库存的领域服务

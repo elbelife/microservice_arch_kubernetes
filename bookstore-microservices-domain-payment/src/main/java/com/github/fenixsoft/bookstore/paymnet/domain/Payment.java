@@ -22,7 +22,7 @@ import com.github.fenixsoft.bookstore.domain.BaseEntity;
 import com.github.fenixsoft.bookstore.domain.account.Account;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import java.util.Date;
 import java.util.UUID;
 

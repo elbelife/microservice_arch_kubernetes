@@ -4,9 +4,9 @@ import com.github.fenixsoft.bookstore.domain.warehouse.DeliveredStatus;
 import com.github.fenixsoft.bookstore.domain.warehouse.Stockpile;
 import com.github.fenixsoft.bookstore.warehouse.domain.StockpileService;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.transaction.Transactional;
 
 /**
  * 商品库存的领域服务

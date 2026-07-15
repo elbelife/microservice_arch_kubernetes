@@ -25,10 +25,10 @@ import com.github.fenixsoft.bookstore.paymnet.domain.service.WalletService;
 import com.github.fenixsoft.bookstore.dto.Settlement;
 import org.springframework.cache.Cache;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.transaction.Transactional;
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.transaction.Transactional;
 
 /**
  * 支付应用务

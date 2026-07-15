@@ -30,11 +30,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * 用户资源
@@ -60,7 +60,7 @@ public class AccountResource {
     @GET
     @Path("/{username}")
     @Cacheable(key = "#username")
-    @PreAuthorize("#oauth2.hasAnyScope('SERVICE','BROWSER')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_SERVICE', 'SCOPE_BROWSER')")
     public Account getUser(@PathParam("username") String username) {
         return service.findAccountByUsername(username);
     }
@@ -79,7 +79,7 @@ public class AccountResource {
      */
     @PUT
     @CacheEvict(key = "#user.username")
-    @PreAuthorize("#oauth2.hasAnyScope('BROWSER')")
+    @PreAuthorize("hasAuthority('SCOPE_BROWSER')")
     public Response updateUser(@Valid @AuthenticatedAccount @NotConflictAccount Account user) {
         return CommonResponse.op(() -> service.updateAccount(user));
     }

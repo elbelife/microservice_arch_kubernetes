@@ -4,7 +4,7 @@ import com.github.fenixsoft.bookstore.domain.account.Account;
 import com.github.fenixsoft.bookstore.resource.JAXRSResourceBase;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

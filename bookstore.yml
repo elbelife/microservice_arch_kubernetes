@@ -15,22 +15,18 @@ metadata:
   name: book-admin-role
   namespace: bookstore-microservices
 rules:
-  - apiGroups:
-      - ""
-      - "extensions"
-      - "app"
-    resources:
-      - namespaces
-      - endpoints
-      - services
-      - nodes
-      - nodes/proxy
-      - pods
-      - configmaps
-    verbs:
-      - list
-      - get
-      - watch
+- apiGroups:
+  - ""
+  - extensions
+  - apps
+  resources:
+  - endpoints
+  - services
+  - pods
+  verbs:
+  - list
+  - get
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -42,9 +38,9 @@ roleRef:
   kind: Role
   name: book-admin-role
 subjects:
-  - kind: ServiceAccount
-    name: book-admin
-    namespace: bookstore-microservices
+- kind: ServiceAccount
+  name: book-admin
+  namespace: bookstore-microservices
 ---
 apiVersion: v1
 data:
@@ -285,8 +281,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-    - port: 80
-      targetPort: http-server
+  - port: 80
+    targetPort: http-server
   selector:
     app: account
   type: ClusterIP
@@ -300,9 +296,9 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-    - nodePort: 30080
-      port: 8080
-      targetPort: http-server
+  - nodePort: 30080
+    port: 8080
+    targetPort: http-server
   selector:
     app: gateway
   type: NodePort
@@ -316,8 +312,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-    - port: 80
-      targetPort: http-server
+  - port: 80
+    targetPort: http-server
   selector:
     app: payment
   type: ClusterIP
@@ -331,8 +327,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-    - port: 80
-      targetPort: http-server
+  - port: 80
+    targetPort: http-server
   selector:
     app: security
   type: ClusterIP
@@ -346,8 +342,8 @@ metadata:
   namespace: bookstore-microservices
 spec:
   ports:
-    - port: 80
-      targetPort: http-server
+  - port: 80
+    targetPort: http-server
   selector:
     app: warehouse
   type: ClusterIP
@@ -370,17 +366,26 @@ spec:
         app: account
     spec:
       containers:
-        - env:
-            - name: PORT
-              value: "80"
-            - name: JAVA_TOOL_OPTIONS
-              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-          image: icyfenix/bookstore-kubernetes-domain-account
-          name: account
-          ports:
-            - containerPort: 80
-              name: http-server
+      - env:
+        - name: PORT
+          value: "80"
+        - name: JAVA_TOOL_OPTIONS
+          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: file:/config/
+        image: icyfenix/bookstore-kubernetes-domain-account
+        name: account
+        ports:
+        - containerPort: 80
+          name: http-server
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
       serviceAccountName: book-admin
+      volumes:
+      - configMap:
+          name: account
+        name: config-volume
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -400,17 +405,26 @@ spec:
         app: payment
     spec:
       containers:
-        - env:
-            - name: PORT
-              value: "80"
-            - name: JAVA_TOOL_OPTIONS
-              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-          image: icyfenix/bookstore-kubernetes-domain-payment
-          name: payment
-          ports:
-            - containerPort: 80
-              name: http-server
+      - env:
+        - name: PORT
+          value: "80"
+        - name: JAVA_TOOL_OPTIONS
+          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: file:/config/
+        image: icyfenix/bookstore-kubernetes-domain-payment
+        name: payment
+        ports:
+        - containerPort: 80
+          name: http-server
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
       serviceAccountName: book-admin
+      volumes:
+      - configMap:
+          name: payment
+        name: config-volume
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -430,17 +444,26 @@ spec:
         app: security
     spec:
       containers:
-        - env:
-            - name: PORT
-              value: "80"
-            - name: JAVA_TOOL_OPTIONS
-              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-          image: icyfenix/bookstore-kubernetes-domain-security
-          name: security
-          ports:
-            - containerPort: 80
-              name: http-server
+      - env:
+        - name: PORT
+          value: "80"
+        - name: JAVA_TOOL_OPTIONS
+          value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: file:/config/
+        image: icyfenix/bookstore-kubernetes-domain-security
+        name: security
+        ports:
+        - containerPort: 80
+          name: http-server
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
       serviceAccountName: book-admin
+      volumes:
+      - configMap:
+          name: security
+        name: config-volume
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -460,17 +483,51 @@ spec:
         app: warehouse
     spec:
       containers:
-        - env:
-            - name: PORT
-              value: "80"
-            - name: JAVA_TOOL_OPTIONS
-              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-          image: icyfenix/bookstore-kubernetes-domain-warehouse
-          name: warehouse
-          ports:
-            - containerPort: 80
-              name: http-server
+      - env:
+        - name: PORT
+          value: "80"
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: file:/config/
+        image: icyfenix/bookstore-kubernetes-domain-warehouse
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        name: warehouse
+        ports:
+        - containerPort: 80
+          name: http-server
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
       serviceAccountName: book-admin
+      volumes:
+      - configMap:
+          name: warehouse
+        name: config-volume
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -490,14 +547,48 @@ spec:
         app: gateway
     spec:
       containers:
-        - env:
-            - name: PORT
-              value: "8080"
-            - name: JAVA_TOOL_OPTIONS
-              value: -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y
-          image: icyfenix/bookstore-kubernetes-platform-gateway
-          name: gateway
-          ports:
-            - containerPort: 8080
-              name: http-server
+      - env:
+        - name: PORT
+          value: "8080"
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: file:/config/
+        image: icyfenix/bookstore-kubernetes-platform-gateway
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        name: gateway
+        ports:
+        - containerPort: 8080
+          name: http-server
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 800m
+            memory: 1.5Gi
+          requests:
+            cpu: 300m
+            memory: 768Mi
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
       serviceAccountName: book-admin
+      volumes:
+      - configMap:
+          name: gateway
+        name: config-volume
