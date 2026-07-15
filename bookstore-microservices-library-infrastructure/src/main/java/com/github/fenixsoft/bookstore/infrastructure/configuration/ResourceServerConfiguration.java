@@ -60,7 +60,7 @@ public class ResourceServerConfiguration {
     @Bean
     public JwtDecoder jwtDecoder() {
         byte[] keyBytes = JWT_TOKEN_SIGNING_PRIVATE_KEY.getBytes();
-        SecretKey secretKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES");
+        SecretKey secretKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
 
