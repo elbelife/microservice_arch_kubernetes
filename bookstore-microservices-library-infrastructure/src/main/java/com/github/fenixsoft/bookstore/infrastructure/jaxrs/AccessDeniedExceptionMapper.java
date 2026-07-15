@@ -26,12 +26,6 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDenied
 
     @Override
     public Response toResponse(AccessDeniedException exception) {
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            System.out.println("DEBUG_ACCESS_DENIED - Auth class: " + auth.getClass().getName() + ", principal: " + auth.getPrincipal() + ", authorities: " + auth.getAuthorities() + ", authenticated: " + auth.isAuthenticated());
-        } else {
-            System.out.println("DEBUG_ACCESS_DENIED - Auth is null!");
-        }
         log.warn("越权访问被禁止 {}: {}", request.getMethod(), request.getPathInfo());
         return CommonResponse.send(Response.Status.FORBIDDEN, exception.getMessage());
     }
