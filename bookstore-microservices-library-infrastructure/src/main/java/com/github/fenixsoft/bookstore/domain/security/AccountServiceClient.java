@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.MediaType;
  * @author icyfenix@gmail.com
  * @date 2020/4/18 12:33
  **/
-@FeignClient(name = "account", url = "http://${ACCOUNT_HOST:account}:${ACCOUNT_PORT:80}")
+@FeignClient(name = "account", url = "http://${ACCOUNT_HOST:account}")
 public interface AccountServiceClient {
 
     @GET
