@@ -9,10 +9,12 @@ data:
     database: hsqldb
 
     spring:
-      datasource:
-        schema: "classpath:db/${database}/schema.sql"
-        data: "classpath:db/${database}/data.sql"
-        sql-script-encoding: UTF-8
+      sql:
+        init:
+          schema-locations: "classpath:db/${database}/schema.sql"
+          data-locations: "classpath:db/${database}/data.sql"
+          encoding: UTF-8
+          mode: always
       jpa:
         show-sql: false
         hibernate:
@@ -120,10 +122,12 @@ data:
     database: hsqldb
 
     spring:
-      datasource:
-        schema: "classpath:db/${database}/schema.sql"
-        data: "classpath:db/${database}/data.sql"
-        sql-script-encoding: UTF-8
+      sql:
+        init:
+          schema-locations: "classpath:db/${database}/schema.sql"
+          data-locations: "classpath:db/${database}/data.sql"
+          encoding: UTF-8
+          mode: always
       jpa:
         show-sql: false
         hibernate:
@@ -193,10 +197,12 @@ data:
     database: hsqldb
 
     spring:
-      datasource:
-        schema: "classpath:db/${database}/schema.sql"
-        data: "classpath:db/${database}/data.sql"
-        sql-script-encoding: UTF-8
+      sql:
+        init:
+          schema-locations: "classpath:db/${database}/schema.sql"
+          data-locations: "classpath:db/${database}/data.sql"
+          encoding: UTF-8
+          mode: always
       jpa:
         show-sql: false
         hibernate:
@@ -452,27 +458,10 @@ spec:
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
           value: file:/config/
         image: icyfenix/bookstore-kubernetes-domain-warehouse
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /health
-            port: 80
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
         name: warehouse
         ports:
         - containerPort: 80
           name: http-server
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /health
-            port: 80
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
         resources:
           limits:
             cpu: 500m
@@ -480,9 +469,6 @@ spec:
           requests:
             cpu: 200m
             memory: 512Mi
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
         volumeMounts:
         - mountPath: /config
           name: config-volume
@@ -517,27 +503,10 @@ spec:
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
           value: file:/config/
         image: icyfenix/bookstore-kubernetes-platform-gateway
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
         name: gateway
         ports:
         - containerPort: 8080
           name: http-server
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
         resources:
           limits:
             cpu: 800m
@@ -545,9 +514,6 @@ spec:
           requests:
             cpu: 300m
             memory: 768Mi
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
         volumeMounts:
         - mountPath: /config
           name: config-volume

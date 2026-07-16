@@ -39,25 +39,7 @@ spec:
             limits:
               cpu: "800m"
               memory: "1.5Gi"
-          livenessProbe: # Added liveness probe
-            httpGet:
-              path: /health # Adjust path if different (e.g., /actuator/health/liveness)
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe: # Added readiness probe
-            httpGet:
-              path: /health # Adjust path if different (e.g., /actuator/health/readiness)
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          securityContext: # Added security context
-            runAsNonRoot: true
-            runAsUser: 1000 # Example user ID, ensure this user exists in your container image
+
       volumes:
         - name: config-volume
           configMap:
