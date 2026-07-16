@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  * @author icyfenix@gmail.com
  * @date 2020/4/19 22:22
  **/
-@FeignClient(name = "warehouse")
+@FeignClient(name = "warehouse", url = "http://${WAREHOUSE_HOST:warehouse}:${WAREHOUSE_PORT:80}")
 public interface ProductServiceClient {
 
     default void replenishProductInformation(Settlement bill) {
