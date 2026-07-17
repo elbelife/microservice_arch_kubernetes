@@ -7,6 +7,10 @@ data:
   application.yaml: |-
     database: hsqldb
 
+    spring:
+      application:
+        name: security
+
     security:
       oauth2:
         client:

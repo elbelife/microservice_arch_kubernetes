@@ -8,6 +8,8 @@ data:
     database: hsqldb
 
     spring:
+      application:
+        name: warehouse
       sql:
         init:
           schema-locations: "classpath:db/${database}/schema.sql"

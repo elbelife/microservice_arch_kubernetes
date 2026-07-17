@@ -9,6 +9,8 @@ data:
     database: hsqldb
 
     spring:
+      application:
+        name: account
       sql:
         init:
           schema-locations: "classpath:db/${database}/schema.sql"
@@ -117,6 +119,8 @@ data:
     database: hsqldb
 
     spring:
+      application:
+        name: payment
       sql:
         init:
           schema-locations: "classpath:db/${database}/schema.sql"
@@ -159,6 +163,10 @@ data:
   application.yaml: |-
     database: hsqldb
 
+    spring:
+      application:
+        name: security
+
     security:
       oauth2:
         client:
@@ -187,6 +195,8 @@ data:
     database: hsqldb
 
     spring:
+      application:
+        name: warehouse
       sql:
         init:
           schema-locations: "classpath:db/${database}/schema.sql"
