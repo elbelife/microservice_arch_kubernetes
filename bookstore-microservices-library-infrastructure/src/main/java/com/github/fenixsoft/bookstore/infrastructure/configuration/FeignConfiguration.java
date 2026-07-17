@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 3. 自动传播 JWT Bearer 令牌以实现微服务间认证
  *    - 若 SecurityContext 中有用户 JWT（BROWSER 请求），直接转发
  *    - 若无用户 JWT（服务间 M2M 调用），自动以 client_credentials 方式向 security 服务申请 SERVICE 令牌
+ *    - 特别地，如果自身就是 security 服务，则直接本地生成 SERVICE 令牌以避免网络环路死锁/超时
  *
  * @author icyfenix@gmail.com
  * @date 2020/4/18 22:38
@@ -43,6 +44,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FeignConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(FeignConfiguration.class);
+
+    private static final String JWT_TOKEN_SIGNING_PRIVATE_KEY = "601304E0-8AD4-40B0-BD51-0B432DC47461";
+
+    @Value("${spring.application.name}")
+    private String applicationName;
 
     /** security 服务地址，在 Kubernetes 中使用 K8s DNS，本地开发时可覆盖 */
     @Value("${feign.oauth2.token-uri:http://security/oauth/token}")
@@ -82,6 +88,16 @@ public class FeignConfiguration {
     }
 
     private String getOrRefreshServiceToken() {
+        // 特别处理：如果自身是 security 服务，直接本地签名生成 Token，防止对自身的 HTTP 回调死锁
+        if ("security".equalsIgnoreCase(applicationName)) {
+            try {
+                return generateLocalToken();
+            } catch (Exception e) {
+                log.error("Failed to generate local security token", e);
+                return null;
+            }
+        }
+
         CachedToken current = cachedToken.get();
         if (current.isValid()) {
             return current.token;
@@ -118,6 +134,25 @@ public class FeignConfiguration {
             log.warn("Failed to obtain service token from {}: {}", tokenUri, e.getMessage());
         }
         return null;
+    }
+
+    private String generateLocalToken() throws Exception {
+        byte[] keyBytes = JWT_TOKEN_SIGNING_PRIVATE_KEY.getBytes();
+        com.nimbusds.jose.JWSSigner signer = new com.nimbusds.jose.crypto.MACSigner(keyBytes);
+        com.nimbusds.jwt.JWTClaimsSet claimsSet = new com.nimbusds.jwt.JWTClaimsSet.Builder()
+                .subject("security")
+                .issueTime(new java.util.Date())
+                .expirationTime(new java.util.Date(System.currentTimeMillis() + 3600 * 1000))
+                .claim("user_name", "security")
+                .claim("username", "security")
+                .claim("authorities", new String[]{})
+                .claim("scope", "SERVICE")
+                .build();
+
+        com.nimbusds.jwt.SignedJWT signedJWT = new com.nimbusds.jwt.SignedJWT(
+                new com.nimbusds.jose.JWSHeader(com.nimbusds.jose.JWSAlgorithm.HS256), claimsSet);
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
     }
 
     private static class CachedToken {
