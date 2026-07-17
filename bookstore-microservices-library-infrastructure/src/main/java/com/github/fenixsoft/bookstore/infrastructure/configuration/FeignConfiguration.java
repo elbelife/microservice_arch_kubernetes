@@ -47,7 +47,7 @@ public class FeignConfiguration {
 
     private static final String JWT_TOKEN_SIGNING_PRIVATE_KEY = "601304E0-8AD4-40B0-BD51-0B432DC47461";
 
-    @Value("${spring.application.name}")
+    @Value("${spring.application.name:}")
     private String applicationName;
 
     /** security 服务地址，在 Kubernetes 中使用 K8s DNS，本地开发时可覆盖 */
