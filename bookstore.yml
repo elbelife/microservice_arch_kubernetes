@@ -27,16 +27,11 @@ data:
         cache:
           period: 86400
 
-    security:
+    feign:
       oauth2:
-        client:
-          clientId: account
-          clientSecret: account_secret
-          accessTokenUri: http://${AUTH_HOST:security}:${AUTH_PORT:80}/oauth/token
-          grant-type: client_credentials
-          scope: SERVICE
-        resource:
-          userInfoUri: BUGFIX
+        token-uri: http://security/oauth/token
+        client-id: account
+        client-secret: account_secret
 
     logging:
       pattern:
@@ -140,16 +135,11 @@ data:
         cache:
           period: 86400
 
-    security:
+    feign:
       oauth2:
-        client:
-          clientId: payment
-          clientSecret: payment_secret
-          accessTokenUri: http://${AUTH_HOST:security}:${AUTH_PORT:80}/oauth/token
-          grant-type: client_credentials
-          scope: SERVICE
-        resource:
-          userInfoUri: BUGFIX
+        token-uri: http://security/oauth/token
+        client-id: payment
+        client-secret: payment_secret
 
     logging:
       pattern:
@@ -215,16 +205,11 @@ data:
         cache:
           period: 86400
 
-    security:
+    feign:
       oauth2:
-        client:
-          clientId: warehouse
-          clientSecret: warehouse_secret
-          accessTokenUri: http://${AUTH_HOST:security}:${AUTH_PORT:80}/oauth/token
-          grant-type: client_credentials
-          scope: SERVICE
-        resource:
-          userInfoUri: BUGFIX
+        token-uri: http://security/oauth/token
+        client-id: warehouse
+        client-secret: warehouse_secret
 
     logging:
       pattern:

@@ -26,16 +26,11 @@ data:
         cache:
           period: 86400
 
-    security:
+    feign:
       oauth2:
-        client:
-          clientId: warehouse
-          clientSecret: warehouse_secret
-          accessTokenUri: http://${AUTH_HOST:security}:${AUTH_PORT:80}/oauth/token
-          grant-type: client_credentials
-          scope: SERVICE
-        resource:
-          userInfoUri: BUGFIX
+        token-uri: http://security/oauth/token
+        client-id: warehouse
+        client-secret: warehouse_secret
 
     logging:
       pattern:
