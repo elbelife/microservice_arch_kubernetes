@@ -84,7 +84,18 @@ public class ResourceServerConfiguration {
             if (username == null) {
                 username = jwt.getSubject();
             }
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(username);
+            } catch (Exception e) {
+                // For client_credentials (M2M) tokens, the client ID (e.g. warehouse, payment, account)
+                // is populated as username, but does not exist in the user database.
+                // We fallback to a transient UserDetails with empty passwords and standard user role.
+                userDetails = org.springframework.security.core.userdetails.User.withUsername(username)
+                        .password("")
+                        .authorities(new SimpleGrantedAuthority("ROLE_USER"))
+                        .build();
+            }
             List<GrantedAuthority> authorities = new ArrayList<>(userDetails.getAuthorities());
             Object scopes = jwt.getClaim("scope");
             if (scopes instanceof Collection) {
