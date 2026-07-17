@@ -1,5 +1,6 @@
 package com.github.fenixsoft.bookstore.security.resource;
 
+import com.github.fenixsoft.bookstore.domain.security.AuthenticAccount;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -46,13 +47,13 @@ public class OAuthTokenController {
                 Authentication auth = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(username, password)
                 );
-                UserDetails userDetails = (UserDetails) auth.getPrincipal();
+                AuthenticAccount userDetails = (AuthenticAccount) auth.getPrincipal();
                 String[] authorities = userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toArray(String[]::new);
 
-                String accessToken = generateJwt(username, authorities, "BROWSER", 3600 * 3);
-                String refreshToken = generateJwt(username, authorities, "BROWSER", 3600 * 24 * 15);
+                String accessToken = generateUserJwt(userDetails, authorities, "BROWSER", 3600 * 3);
+                String refreshToken = generateUserJwt(userDetails, authorities, "BROWSER", 3600 * 24 * 15);
                 Map<String, Object> response = new HashMap<>();
                 response.put("access_token", accessToken);
                 response.put("refresh_token", refreshToken);
@@ -84,8 +85,17 @@ public class OAuthTokenController {
                 List<String> authList = claims.getStringListClaim("authorities");
                 String[] authorities = authList != null ? authList.toArray(String[]::new) : new String[]{};
 
-                String accessToken = generateJwt(subject, authorities, "BROWSER", 3600 * 3);
-                String newRefreshToken = generateJwt(subject, authorities, "BROWSER", 3600 * 24 * 15);
+                // 从 Refresh Token 中拷贝用户信息 claim
+                Number idNum = (Number) claims.getClaim("id");
+                Integer id = idNum != null ? idNum.intValue() : null;
+                String name = claims.getStringClaim("name");
+                String avatar = claims.getStringClaim("avatar");
+                String telephone = claims.getStringClaim("telephone");
+                String email = claims.getStringClaim("email");
+                String location = claims.getStringClaim("location");
+
+                String accessToken = generateUserJwt(subject, id, name, avatar, telephone, email, location, authorities, "BROWSER", 3600 * 3);
+                String newRefreshToken = generateUserJwt(subject, id, name, avatar, telephone, email, location, authorities, "BROWSER", 3600 * 24 * 15);
                 Map<String, Object> response = new HashMap<>();
                 response.put("access_token", accessToken);
                 response.put("refresh_token", newRefreshToken);
@@ -114,6 +124,33 @@ public class OAuthTokenController {
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
+    }
+
+    private String generateUserJwt(AuthenticAccount user, String[] authorities, String scope, long expirationSeconds) throws Exception {
+        return generateUserJwt(user.getUsername(), user.getId(), user.getName(), user.getAvatar(), user.getTelephone(), user.getEmail(), user.getLocation(), authorities, scope, expirationSeconds);
+    }
+
+    private String generateUserJwt(String username, Integer id, String name, String avatar, String telephone, String email, String location, String[] authorities, String scope, long expirationSeconds) throws Exception {
+        JWSSigner signer = new MACSigner(JWT_TOKEN_SIGNING_PRIVATE_KEY);
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
+                .subject(username)
+                .issueTime(new Date())
+                .expirationTime(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
+                .claim("user_name", username)
+                .claim("username", username)
+                .claim("authorities", authorities)
+                .claim("scope", scope);
+
+        if (id != null) builder.claim("id", id);
+        if (name != null) builder.claim("name", name);
+        if (avatar != null) builder.claim("avatar", avatar);
+        if (telephone != null) builder.claim("telephone", telephone);
+        if (email != null) builder.claim("email", email);
+        if (location != null) builder.claim("location", location);
+
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), builder.build());
         signedJWT.sign(signer);
         return signedJWT.serialize();
     }

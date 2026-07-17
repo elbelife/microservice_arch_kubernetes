@@ -84,19 +84,46 @@ public class ResourceServerConfiguration {
             if (username == null) {
                 username = jwt.getSubject();
             }
-            UserDetails userDetails;
-            try {
-                userDetails = userDetailsService.loadUserByUsername(username);
-            } catch (Exception e) {
-                // For client_credentials (M2M) tokens, the client ID (e.g. warehouse, payment, account)
-                // is populated as username, but does not exist in the user database.
-                // We fallback to a transient UserDetails with empty passwords and standard user role.
-                userDetails = org.springframework.security.core.userdetails.User.withUsername(username)
-                        .password("")
-                        .authorities(new SimpleGrantedAuthority("ROLE_USER"))
-                        .build();
+
+            // Reconstruct AuthenticAccount directly from JWT claims to remain completely stateless
+            // and avoid database lookup loops over Feign/HTTP.
+            com.github.fenixsoft.bookstore.domain.security.AuthenticAccount userDetails = new com.github.fenixsoft.bookstore.domain.security.AuthenticAccount();
+            userDetails.setUsername(username);
+            userDetails.setPassword(""); // password is not needed for authenticated principal
+
+            if (jwt.hasClaim("id")) {
+                Object idVal = jwt.getClaim("id");
+                if (idVal instanceof Number) {
+                    userDetails.setId(((Number) idVal).intValue());
+                }
+                userDetails.setName(jwt.getClaimAsString("name"));
+                userDetails.setAvatar(jwt.getClaimAsString("avatar"));
+                userDetails.setTelephone(jwt.getClaimAsString("telephone"));
+                userDetails.setEmail(jwt.getClaimAsString("email"));
+                userDetails.setLocation(jwt.getClaimAsString("location"));
+            } else {
+                // Machine M2M token: fallback values
+                userDetails.setId(-1);
+                userDetails.setName(username);
             }
-            List<GrantedAuthority> authorities = new ArrayList<>(userDetails.getAuthorities());
+
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            
+            // Extract authorities from JWT
+            Object jwtAuthorities = jwt.getClaim("authorities");
+            if (jwtAuthorities instanceof Collection) {
+                for (Object auth : (Collection<?>) jwtAuthorities) {
+                    authorities.add(new SimpleGrantedAuthority(auth.toString()));
+                }
+            } else if (jwtAuthorities instanceof String) {
+                authorities.add(new SimpleGrantedAuthority((String) jwtAuthorities));
+            } else if (jwtAuthorities instanceof String[]) {
+                for (String auth : (String[]) jwtAuthorities) {
+                    authorities.add(new SimpleGrantedAuthority(auth));
+                }
+            }
+
+            // Extract scopes from JWT
             Object scopes = jwt.getClaim("scope");
             if (scopes instanceof Collection) {
                 for (Object scope : (Collection<?>) scopes) {
@@ -105,6 +132,9 @@ public class ResourceServerConfiguration {
             } else if (scopes instanceof String) {
                 authorities.add(new SimpleGrantedAuthority("SCOPE_" + scopes));
             }
+
+            userDetails.setAuthorities(authorities);
+
             return new UsernamePasswordAuthenticationToken(userDetails, jwt, authorities);
         };
     }
