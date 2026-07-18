@@ -47,8 +47,7 @@ public class StockpileResource {
      */
     @GET
     @Path("/stockpile/{productId}")
-    @RolesAllowed(Role.ADMIN)
-    @PreAuthorize("hasAnyAuthority('SCOPE_BROWSER', 'SCOPE_SERVICE')")
+    @PreAuthorize("hasAuthority('SCOPE_SERVICE') or (hasAuthority('SCOPE_BROWSER') and hasRole('ADMIN'))")
     public Stockpile queryStockpile(@PathParam("productId") Integer productId) {
         return service.getStockpile(productId);
     }
