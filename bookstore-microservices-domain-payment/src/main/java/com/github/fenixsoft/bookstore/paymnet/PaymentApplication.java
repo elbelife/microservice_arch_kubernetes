@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
-// Trigger Skaffold rebuild to load updated library-infrastructure
+// Trigger Skaffold rebuild to load updated library-infrastructure v2
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {"com.github.fenixsoft.bookstore"})
 public class PaymentApplication {
