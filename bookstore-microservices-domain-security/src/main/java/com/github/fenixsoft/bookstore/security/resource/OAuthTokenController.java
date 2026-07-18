@@ -60,6 +60,7 @@ public class OAuthTokenController {
                 response.put("token_type", "bearer");
                 response.put("expires_in", 3600 * 3);
                 response.put("scope", "BROWSER");
+                response.put("username", userDetails.getUsername());
                 return ResponseEntity.ok(response);
 
             } else if ("client_credentials".equalsIgnoreCase(grantType)) {
@@ -102,6 +103,7 @@ public class OAuthTokenController {
                 response.put("token_type", "bearer");
                 response.put("expires_in", 3600 * 3);
                 response.put("scope", "BROWSER");
+                response.put("username", subject);
                 return ResponseEntity.ok(response);
             }
             
